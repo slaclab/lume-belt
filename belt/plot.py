@@ -47,9 +47,8 @@ def plot_lattice_lines(
             Bend, Chicane, DriftTube, RFCavity, WriteBeam, ChangeEnergy, Wakefield, Exit
         ]
     ],
-    
 ):
-    #fig, ax = plt.subplots(figsize=(15, 4))
+    # fig, ax = plt.subplots(figsize=(15, 4))
     current_position = 0
 
     for element in lattice_lines:
@@ -115,7 +114,8 @@ def plot_lattice_lines(
     ax.set_ylim(0, 2)
     ax.set_xlabel("Distance (m)")
     ax.set_yticks([])  # Hide y-axis ticks
-    ax.set_title("Lattice Layout", fontsize = 8)
+    ax.set_title("Lattice Layout", fontsize=8)
+
 
 def plot_stats_with_layout(
     output: BELTOutput,
@@ -181,7 +181,9 @@ def plot_stats_with_layout(
         `return_figure` is set to False.
     """
     if include_layout:
-        fig, all_axis = plt.subplots(2, gridspec_kw={"height_ratios": [10, 2]},figsize=(15, 10),  **kwargs)
+        fig, all_axis = plt.subplots(
+            2, gridspec_kw={"height_ratios": [10, 2]}, figsize=(15, 10), **kwargs
+        )
         ax_layout = all_axis[-1]
         ax_plot = [all_axis[0]]
     else:
@@ -214,7 +216,7 @@ def plot_stats_with_layout(
     else:
         xlim = x_array.min(), x_array.max()
         good = slice(None, None, None)  # everything
-   
+
     # X axis scaling
     units_x = str(output.units[xkey])
     if nice:
@@ -334,6 +336,7 @@ def plot_stats_with_layout(
 
     if return_figure:
         return fig
+
 
 # Example usage:
 if __name__ == "__main__":

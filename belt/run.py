@@ -23,7 +23,14 @@ from .output import RunInfo
 from .fieldmap import read_fieldmap_rfdata, write_fieldmap_rfdata
 from typing import List, Dict
 
-from .input import BELTInput, assign_names_to_elements, DriftTube, Bend, RFCavity, Wakefield
+from .input import (
+    BELTInput,
+    assign_names_to_elements,
+    DriftTube,
+    Bend,
+    RFCavity,
+    Wakefield,
+)
 from .output import BELTOutput
 from .particles import BELTParticleData
 
@@ -94,19 +101,19 @@ class BELT(CommandWrapper):
     fieldmaps: List[Dict] = []
 
     def __init__(
-            self,
-            input: Optional[Union[BELTInput, str, pathlib.Path]] = None,
-            *,
-            workdir: Optional[Union[str, pathlib.Path]] = None,
-            output: Optional[BELTOutput] = None,
-            command: Optional[str] = None,
-            command_mpi: Optional[str] = None,
-            use_mpi: bool = False,
-            mpi_run: str = "",
-            use_temp_dir: bool = True,
-            verbose: bool = tools.global_display_options.verbose >= 1,
-            timeout: Optional[float] = None,
-            **kwargs: Any,
+        self,
+        input: Optional[Union[BELTInput, str, pathlib.Path]] = None,
+        *,
+        workdir: Optional[Union[str, pathlib.Path]] = None,
+        output: Optional[BELTOutput] = None,
+        command: Optional[str] = None,
+        command_mpi: Optional[str] = None,
+        use_mpi: bool = False,
+        mpi_run: str = "",
+        use_temp_dir: bool = True,
+        verbose: bool = tools.global_display_options.verbose >= 1,
+        timeout: Optional[float] = None,
+        **kwargs: Any,
     ):
         super().__init__(
             command=command,
@@ -185,9 +192,9 @@ class BELT(CommandWrapper):
 
     @override
     def run(
-            self,
-            load_particles: bool = False,
-            raise_on_error: bool = True,
+        self,
+        load_particles: bool = False,
+        raise_on_error: bool = True,
     ) -> BELTOutput:
         """
         Execute BELT with the configured input settings.
@@ -385,9 +392,9 @@ class BELT(CommandWrapper):
 
     @override
     def write_input(
-            self,
-            path: Optional[AnyPath] = None,
-            write_run_script: bool = True,
+        self,
+        path: Optional[AnyPath] = None,
+        write_run_script: bool = True,
     ):
         """
         Write the input parameters into the file.
@@ -419,7 +426,7 @@ class BELT(CommandWrapper):
         # self.update_beam_radius(r, name)
 
         # write main input file
-        filename = os.path.join(path, 'belt.in')
+        filename = os.path.join(path, "belt.in")
         self.input.to_file(filename=filename)
 
         # write run script
@@ -427,11 +434,12 @@ class BELT(CommandWrapper):
             self.write_run_script(path)
 
     def write_initial_particles(self, path: Optional[AnyPath] = None) -> None:
-
         if self.initial_particles:
             Ek = self._input.parameters.Ek
             if isinstance(self.initial_particles, ParticleGroup):
-                self.initial_particles = BELTParticleData.from_ParticleGroup(self.initial_particles, Ek)
+                self.initial_particles = BELTParticleData.from_ParticleGroup(
+                    self.initial_particles, Ek
+                )
             else:
                 # If read from BELT output, shift the ref energy to the one defined in input file
                 self.initial_particles.shift_ref_energy(Ek)
@@ -441,11 +449,9 @@ class BELT(CommandWrapper):
             self._input.parameters.flagdist = 100
             self._input.parameters.np = self.initial_particles.np
 
-
-
         elif self._input.parameters.flagdist in [100, 200, 300]:
-            src = os.path.join(self.input_file_path, 'pts.in')
-            dest = os.path.join(path, 'pts.in')
+            src = os.path.join(self.input_file_path, "pts.in")
+            dest = os.path.join(path, "pts.in")
 
             assert os.path.isfile(src), "Initial particles file not found"
 
@@ -457,21 +463,25 @@ class BELT(CommandWrapper):
                 shutil.copyfile(src, dest)
                 # writers.write_input_particles_from_file(src, dest, self.header['Np'])
             else:
-                self.vprint('pts.in already exits, will not overwrite.')
+                self.vprint("pts.in already exits, will not overwrite.")
 
     def update_ref_energy(self, Ek: float) -> None:
         print("Updating Ek in the header and shifting the ref energy in particles.\n")
-        print("Warning: The lattice parameters may need to be updated with the new ref energy")
+        print(
+            "Warning: The lattice parameters may need to be updated with the new ref energy"
+        )
 
         self._input.parameters.Ek = Ek
         self.initial_particles.shift_ref_energy(Ek)
 
     def update_beam_radius(self, r: float, name: str) -> None:
-        print('Updating beam radius in the lattice element ', name, ' to be ', r)
+        print("Updating beam radius in the lattice element ", name, " to be ", r)
         for lattice_element in self._input.lattice_lines:
-            if (isinstance(lattice_element, DriftTube) or
-                isinstance(lattice_element, Bend) or
-                isinstance(lattice_element, RFCavity)) and lattice_element.name == name:
+            if (
+                isinstance(lattice_element, DriftTube)
+                or isinstance(lattice_element, Bend)
+                or isinstance(lattice_element, RFCavity)
+            ) and lattice_element.name == name:
                 lattice_element.V1 = r
 
     def load_wakefield(self, path: Optional[AnyPath] = None) -> None:
@@ -485,16 +495,16 @@ class BELT(CommandWrapper):
                 if file_id in rec:
                     continue
 
-                self.fieldmaps.append(read_fieldmap_rfdata(self.input_file_path, file_id))
+                self.fieldmaps.append(
+                    read_fieldmap_rfdata(self.input_file_path, file_id)
+                )
                 rec.append(file_id)
 
     def write_wakefield(self, path: Optional[AnyPath] = None) -> None:
-
         self.load_wakefield(path=self.input_file_path)
 
         for fieldmap in self.fieldmaps:
-
-            dest = os.path.join(path, fieldmap['info']['filename'])
+            dest = os.path.join(path, fieldmap["info"]["filename"])
 
             # Don't worry about overwriting in temporary directories
             if self._tempdir and os.path.exists(dest):
@@ -504,7 +514,9 @@ class BELT(CommandWrapper):
                 write_fieldmap_rfdata(dest, fieldmap)
 
             else:
-                self.vprint(fieldmap['info']['filename'] + ' already exits, will not overwrite.')
+                self.vprint(
+                    fieldmap["info"]["filename"] + " already exits, will not overwrite."
+                )
 
     def _archive(self, h5: h5py.Group):
         self.input.archive(h5.create_group("input"))
@@ -570,21 +582,21 @@ class BELT(CommandWrapper):
 
     @override
     def plot(
-            self,
-            y: Union[str, Sequence[str]] = "kinetic_energy",
-            x="distance",
-            xlim=None,
-            ylim=None,
-            ylim2=None,
-            yscale="linear",
-            yscale2="linear",
-            y2="rms_z",
-            nice=True,
-            include_layout=True,
-            include_legend=True,
-            return_figure=False,
-            tex=False,
-            **kwargs,
+        self,
+        y: Union[str, Sequence[str]] = "kinetic_energy",
+        x="distance",
+        xlim=None,
+        ylim=None,
+        ylim2=None,
+        yscale="linear",
+        yscale2="linear",
+        y2="rms_z",
+        nice=True,
+        include_layout=True,
+        include_legend=True,
+        return_figure=False,
+        tex=False,
+        **kwargs,
     ):
         """
         Plots output multiple keys.

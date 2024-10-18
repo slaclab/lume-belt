@@ -7,7 +7,7 @@ import subprocess
 
 import traceback
 
-from typing import  Union
+from typing import Union
 from .types import AnyPath, NDArray
 import enum
 import numpy as np
@@ -77,10 +77,12 @@ class DisplayOptions(
 
 global_display_options = DisplayOptions()
 
+
 class NpEncoder(json.JSONEncoder):
     """
     See: https://stackoverflow.com/questions/50916422/python-typeerror-object-of-type-int64-is-not-json-serializable/50916741
     """
+
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -98,6 +100,7 @@ class OutputMode(enum.Enum):
     unknown = "unknown"
     plain = "plain"
     html = "html"
+
 
 @functools.cache
 def get_output_mode() -> OutputMode:
@@ -137,12 +140,13 @@ def is_jupyter() -> bool:
     """Is Jupyter detected?"""
     return get_output_mode() == OutputMode.html
 
+
 def safe_loadtxt(filepath: AnyPath, **kwargs) -> NDArray:
     """
     Similar to np.loadtxt, but handles old-style exponents d -> e
     """
     s = open(filepath).readlines()
-    s = list(map(lambda x: x.lower().replace('d', 'e'), s))
+    s = list(map(lambda x: x.lower().replace("d", "e"), s))
     return np.loadtxt(s, **kwargs)
 
 
@@ -201,6 +205,7 @@ def execute2(cmd, timeout=None, cwd=None):
         output["why_error"] = "unknown"
     return output
 
+
 def import_by_name(clsname: str) -> type:
     """
     Import the given class or function by name.
@@ -225,15 +230,21 @@ def import_by_name(clsname: str) -> type:
     except AttributeError:
         raise ImportError(f"Unable to import {clsname!r} from module {module!r}")
 
+
 def full_path(path):
     """
     Helper function to expand enviromental variables and return the absolute path
     """
     return os.path.abspath(os.path.expandvars(os.path.expanduser(path)))
 
+
 def class_key_data(E):
-     keyed_data = {key: value for key, value in E.__dict__.items() if not key.startswith('__') and not callable(key)}
-     return keyed_data
+    keyed_data = {
+        key: value
+        for key, value in E.__dict__.items()
+        if not key.startswith("__") and not callable(key)
+    }
+    return keyed_data
 
 
 def update_hash(keyed_data, h):
@@ -246,7 +257,8 @@ def update_hash(keyed_data, h):
         val = keyed_data[key]
         s = json.dumps(val, sort_keys=True, cls=NpEncoder).encode()
         h.update(s)
-        
+
+
 def fingerprint(keyed_data, digest_size=16):
     """
     Creates a cryptographic fingerprint from keyed data.

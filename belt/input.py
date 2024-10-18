@@ -11,6 +11,7 @@ from typing_extensions import override
 from hashlib import blake2b
 from .tools import update_hash
 
+
 # Define the base classes for coefficients and lattice elements
 class Parameters(BaseModel):
     np: int = Field(..., description="Number of macroparticles")
@@ -18,7 +19,9 @@ class Parameters(BaseModel):
     zmin: float = Field(..., description="Minimum z-coordinate (m)")
     zmax: float = Field(..., description="Maximum z-coordinate (m)")
     flagfwd: int = Field(..., description="Flag for forward tracking")
-    flagdist: int = Field(..., description="Switch for different type of initial distributions")
+    flagdist: int = Field(
+        ..., description="Switch for different type of initial distributions"
+    )
     Iavg: float = Field(..., description="Average current (A)")
     Ek: float = Field(..., description="Kinetic energy (eV)")
     mass: float = Field(..., description="Mass (MeV/c^2)")
@@ -162,7 +165,9 @@ class Chicane(BaseModel):
         return cls(
             length=lattice_element.length,
             beam_radius=lattice_element.V[0],
-            drift_length=lattice_element.V[1] if len(lattice_element.V) > 2 else None,     #From Manual it seems that R56t and drift length share V
+            drift_length=lattice_element.V[1]
+            if len(lattice_element.V) > 2
+            else None,  # From Manual it seems that R56t and drift length share V
             R56=lattice_element.V[1] if len(lattice_element.V) > 2 else None,
             T566=lattice_element.V[2] if len(lattice_element.V) > 2 else None,
             U5666=lattice_element.V[3] if len(lattice_element.V) > 3 else None,
@@ -176,7 +181,7 @@ class Chicane(BaseModel):
         V = [
             self.beam_radius,
             self.drift_length,
-            #self.R56 or 0,
+            # self.R56 or 0,
             self.T566 or 0,
             self.U5666 or 0,
             self.angle,
@@ -282,14 +287,18 @@ class ChangeEnergy(BaseModel):
 
 
 class ChangeEnergySpread(BaseModel):
-    energy_spread_increment: float = Field(..., description="Energy spread increment (eV)")
+    energy_spread_increment: float = Field(
+        ..., description="Energy spread increment (eV)"
+    )
     name: Optional[str] = Field(
         None, description="Optional name for the change energy spread element"
     )
 
     @classmethod
     def from_lattice_element(cls, lattice_element: LatticeElement):
-        return cls(energy_spread_increment=lattice_element.V[0], name=lattice_element.name)
+        return cls(
+            energy_spread_increment=lattice_element.V[0], name=lattice_element.name
+        )
 
     def to_lattice_element(self) -> LatticeElement:
         return LatticeElement(
@@ -300,6 +309,7 @@ class ChangeEnergySpread(BaseModel):
             V=[self.energy_spread_increment],
             name=self.name,
         )
+
 
 class Wakefield(BaseModel):
     length: float = Field(..., description="Length of the wakefield element (m)")
@@ -360,7 +370,15 @@ class BELTInput(BaseModel):
     )
     lattice_lines: List[
         Union[
-            DriftTube, Bend, Chicane, RFCavity, WriteBeam, ChangeEnergy, ChangeEnergySpread, Wakefield, Exit
+            DriftTube,
+            Bend,
+            Chicane,
+            RFCavity,
+            WriteBeam,
+            ChangeEnergy,
+            ChangeEnergySpread,
+            Wakefield,
+            Exit,
         ]
     ] = Field(..., description="List of lattice elements")
 
@@ -381,7 +399,15 @@ class BELTInput(BaseModel):
     def parse_lattice_element(
         cls, lattice_values: List[float], name: Optional[str]
     ) -> Union[
-        Bend, Chicane, DriftTube, RFCavity, WriteBeam, ChangeEnergy, ChangeEnergySpread, Wakefield, Exit
+        Bend,
+        Chicane,
+        DriftTube,
+        RFCavity,
+        WriteBeam,
+        ChangeEnergy,
+        ChangeEnergySpread,
+        Wakefield,
+        Exit,
     ]:
         lattice_element = LatticeElement(
             length=lattice_values[0],
@@ -519,7 +545,9 @@ class BELTInput(BaseModel):
             elif isinstance(element, ChangeEnergy):
                 label_line = "! length Bnseg Bmpstp ChangeEnergy energy_increment"
             elif isinstance(element, ChangeEnergySpread):
-                label_line = "! length Bnseg Bmpstp ChangeEnergySpread energy_spread_increment"
+                label_line = (
+                    "! length Bnseg Bmpstp ChangeEnergySpread energy_spread_increment"
+                )
             elif isinstance(element, Wakefield):
                 label_line = "! length Bnseg Bmpstp Wakefield multiplier wake_function_file_id switch"
             elif isinstance(element, Exit):
@@ -582,7 +610,6 @@ class BELTInput(BaseModel):
             )
         return loaded
 
-
     @property
     def arguments(self) -> List[str]:
         """
@@ -594,7 +621,7 @@ class BELTInput(BaseModel):
             Individual arguments to pass to Genesis 4.
         """
         optional_args = []
-       
+
         return [*optional_args]
 
     def write_run_script(
@@ -605,11 +632,11 @@ class BELTInput(BaseModel):
         with open(path, mode="wt") as fp:
             print(shlex.join(shlex.split(command_prefix) + self.arguments), file=fp)
         lume_tools.make_executable(str(path))
-    
+
     @override
     def fingerprint(self, digest_size=16):
         h = blake2b(digest_size=digest_size)
-        for key in ['parameters', 'phase_space_coefficients', 'current_coefficients']:
+        for key in ["parameters", "phase_space_coefficients", "current_coefficients"]:
             keyed_data = class_key_data(getattr(self, key))
             update_hash(keyed_data, h)
         for element in self.lattice_lines:
@@ -621,7 +648,15 @@ class BELTInput(BaseModel):
 def assign_names_to_elements(
     lattice_lines: List[
         Union[
-            Bend, Chicane, DriftTube, RFCavity, WriteBeam, ChangeEnergy, ChangeEnergySpread, Wakefield, Exit
+            Bend,
+            Chicane,
+            DriftTube,
+            RFCavity,
+            WriteBeam,
+            ChangeEnergy,
+            ChangeEnergySpread,
+            Wakefield,
+            Exit,
         ]
     ],
 ):

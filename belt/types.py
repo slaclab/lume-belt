@@ -10,7 +10,9 @@ from pydantic import BaseModel
 from pmd_beamphysics.units import pmd_unit
 
 from typing import Any, Sequence, Type, Union, Annotated, Tuple, Dict
+
 AnyPath = Union[pathlib.Path, str]
+
 
 # Custom Pydantic class to handle numpy ndarray
 class _PydanticNDArray:
@@ -51,6 +53,7 @@ class _PydanticNDArray:
 
 # Annotate numpy arrays to be handled by the custom class
 NDArray = Annotated[np.ndarray, _PydanticNDArray]
+
 
 class _PydanticPmdUnit(BaseModel):
     unitSI: float
@@ -94,5 +97,6 @@ class _PydanticPmdUnit(BaseModel):
         if isinstance(value, dict):
             return cls._from_dict(value)
         raise ValueError(f"No conversion from {value!r} to pmd_unit")
+
 
 PydanticPmdUnit = Annotated[pmd_unit, _PydanticPmdUnit]

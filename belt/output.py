@@ -2,18 +2,26 @@ import os
 import re
 import numpy as np
 from pydantic import BaseModel, Field, ValidationError
-from typing import Sequence,  Union,  Optional, Dict, List
+from typing import Sequence, Union, Optional, Dict, List
 import pydantic
 
 from . import archive as _archive
 import h5py
 from .types import PydanticPmdUnit, NDArray
-from .input import Bend, Chicane, DriftTube, RFCavity, WriteBeam, ChangeEnergy, Wakefield, Exit
-from .plot import PlotMaybeLimits, PlotLimits, plot_stats_with_layout 
+from .input import (
+    Bend,
+    Chicane,
+    DriftTube,
+    RFCavity,
+    WriteBeam,
+    ChangeEnergy,
+    Wakefield,
+    Exit,
+)
+from .plot import PlotMaybeLimits, PlotLimits, plot_stats_with_layout
 import matplotlib
 from pmd_beamphysics.units import pmd_unit
 from .particles import BELTParticleData
-
 
 
 class RunInfo(BaseModel):
@@ -65,6 +73,7 @@ class RunInfo(BaseModel):
         """`True` if the run was successful."""
         return not self.error
 
+
 # Model for stats (formerly fort.2)
 class StatsOutput(BaseModel):
     units: Dict[str, PydanticPmdUnit] = pydantic.Field(default_factory=dict, repr=False)
@@ -96,7 +105,7 @@ class StatsOutput(BaseModel):
             rms_z=data[:, 4],
             mean_delta_gamma=data[:, 5],
             rms_delta_gamma=data[:, 6],
-            units = units
+            units=units,
         )
 
 
@@ -115,12 +124,15 @@ class CurrentProfileOutput(BaseModel):
         units["bunch_length"] = pmd_unit("m")
         units["current"] = pmd_unit("A")
         return cls(
-            bunch_length=data[:, 0], charge_per_cell=data[:, 1], current=data[:, 2], units = units
+            bunch_length=data[:, 0],
+            charge_per_cell=data[:, 1],
+            current=data[:, 2],
+            units=units,
         )
 
 
 # Model for Particle Distribution Outputs (4 columns)
-#class ParticleDistributionOutput(BaseModel):
+# class ParticleDistributionOutput(BaseModel):
 #    units: Dict[str, PydanticPmdUnit] = pydantic.Field(default_factory=dict, repr=False)
 #    z: NDArray = Field(..., description="Z coordinate (m)")
 #    delta_gamma: NDArray = Field(..., description="Δγ")
@@ -141,7 +153,7 @@ class CurrentProfileOutput(BaseModel):
 #            weight=data[:, 2],
 #            delta_e_over_e0=data[:, 3],
 #            units = units
-            
+
 #       )
 
 #    @property
@@ -158,10 +170,12 @@ class BELTOutput(BaseModel):
     units: Dict[str, PydanticPmdUnit] = pydantic.Field(default_factory=dict, repr=False)
     stats: Optional[StatsOutput] = None
     current_profiles: Dict[int, CurrentProfileOutput] = Field(default_factory=dict)
-    particle_distributions: Dict[int, BELTParticleData] = Field(
-        default_factory=dict
-    )
-    lattice_lines: List[Union[Bend, Chicane, DriftTube, RFCavity, WriteBeam, ChangeEnergy, Wakefield, Exit]] = None,
+    particle_distributions: Dict[int, BELTParticleData] = Field(default_factory=dict)
+    lattice_lines: List[
+        Union[
+            Bend, Chicane, DriftTube, RFCavity, WriteBeam, ChangeEnergy, Wakefield, Exit
+        ]
+    ] = (None,)
     run: RunInfo = Field(
         default_factory=RunInfo,
         description="Run-related information - output text and timing.",
@@ -170,14 +184,13 @@ class BELTOutput(BaseModel):
     @classmethod
     def from_directory(cls, directory: str) -> "BELTOutput":
         output = {}
-        units =  dict()
-       
+        units = dict()
+
         # Handle the fort.2 file (stats)
         stats_file = os.path.join(directory, "fort.2")
         if os.path.exists(stats_file):
             output["stats"] = StatsOutput.load_from_file(stats_file)
             units.update(output["stats"].units)
-   
 
         # Handle the fort.i and fort.i+1 files with auto-detection
         current_profiles = {}
@@ -194,13 +207,12 @@ class BELTOutput(BaseModel):
                 if data.shape[1] == 3:  # CurrentProfileOutput has 3 columns
                     current_profiles[i] = CurrentProfileOutput.load_from_file(filepath)
                     units.update(current_profiles[i].units)
-                    
+
                 elif data.shape[1] == 4:  # ParticleDistributionOutput has 4 columns
-                    particle_distributions[i] = (
-                        BELTParticleData.from_BELT_outputfile(filepath)
+                    particle_distributions[i] = BELTParticleData.from_BELT_outputfile(
+                        filepath
                     )
-                    #units.update(particle_distributions[i].units)
-                   
+                    # units.update(particle_distributions[i].units)
 
         output["current_profiles"] = current_profiles
         output["particle_distributions"] = particle_distributions
@@ -208,7 +220,6 @@ class BELTOutput(BaseModel):
         output["units"] = units
 
         return cls(**output)
-
 
     def plot(
         self,
@@ -293,8 +304,10 @@ class BELTOutput(BaseModel):
             **kwargs,
         )
 
-    def plot_distribution(self, file_id: int, xkey: str, ykey:str, bins: int = 50)->None:
-        self.particle_distributions[file_id].plot(xkey = 't', ykey = 'energy', bins = 100)
+    def plot_distribution(
+        self, file_id: int, xkey: str, ykey: str, bins: int = 50
+    ) -> None:
+        self.particle_distributions[file_id].plot(xkey="t", ykey="energy", bins=100)
 
     def archive(self, h5: h5py.Group) -> None:
         """
@@ -324,7 +337,6 @@ class BELTOutput(BaseModel):
                 f"Genesis4Output instance.  Was the HDF group correct?"
             )
         return loaded
-
 
 
 # Example Usage
