@@ -16,6 +16,7 @@ from lume import tools as lume_tools
 from lume.base import CommandWrapper
 from pmd_beamphysics import ParticleGroup
 from typing_extensions import override
+import numpy as np
 
 from . import tools
 
@@ -435,19 +436,22 @@ class BELT(CommandWrapper):
 
     def write_initial_particles(self, path: Optional[AnyPath] = None) -> None:
         if self.initial_particles:
-            Ek = self._input.parameters.Ek
+            #Ek = self._input.parameters.Ek
             if isinstance(self.initial_particles, ParticleGroup):
                 self.initial_particles = BELTParticleData.from_ParticleGroup(
-                    self.initial_particles, Ek
+                    self.initial_particles
                 )
             else:
                 # If read from BELT output, shift the ref energy to the one defined in input file
-                self.initial_particles.shift_ref_energy(Ek)
+                Ek = self.initial_particles.Ek
+                self.update_ref_energy(Ek)
 
             self.initial_particles.write_BELT_input(path)
             # update header
             self._input.parameters.flagdist = 100
             self._input.parameters.np = self.initial_particles.np
+            self._input.parameters.charge = np.sum(self.initial_particles.weight)
+            self._input.parameters.Iavg = self._input.parameters.charge*self._input.parameters.freq
 
         elif self._input.parameters.flagdist in [100, 200, 300]:
             src = os.path.join(self.input_file_path, "pts.in")
@@ -466,13 +470,10 @@ class BELT(CommandWrapper):
                 self.vprint("pts.in already exits, will not overwrite.")
 
     def update_ref_energy(self, Ek: float) -> None:
-        print("Updating Ek in the header and shifting the ref energy in particles.\n")
-        print(
-            "Warning: The lattice parameters may need to be updated with the new ref energy"
-        )
+        print("Updating Ek in the header to", Ek, "eV")
 
         self._input.parameters.Ek = Ek
-        self.initial_particles.shift_ref_energy(Ek)
+        #self.initial_particles.shift_ref_energy(Ek)
 
     def update_beam_radius(self, r: float, name: str) -> None:
         print("Updating beam radius in the lattice element ", name, " to be ", r)

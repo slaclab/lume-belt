@@ -409,6 +409,7 @@ class BELTInput(BaseModel):
         Wakefield,
         Exit,
     ]:
+       
         lattice_element = LatticeElement(
             length=lattice_values[0],
             Bnseg=lattice_values[1] if len(lattice_values) > 1 else None,

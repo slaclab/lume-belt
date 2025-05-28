@@ -15,6 +15,7 @@ from .input import (
     RFCavity,
     WriteBeam,
     ChangeEnergy,
+    ChangeEnergySpread,
     Wakefield,
     Exit,
 )
@@ -173,7 +174,7 @@ class BELTOutput(BaseModel):
     particle_distributions: Dict[int, BELTParticleData] = Field(default_factory=dict)
     lattice_lines: List[
         Union[
-            Bend, Chicane, DriftTube, RFCavity, WriteBeam, ChangeEnergy, Wakefield, Exit
+            Bend, Chicane, DriftTube, RFCavity, WriteBeam, ChangeEnergy, ChangeEnergySpread, Wakefield, Exit
         ]
     ] = (None,)
     run: RunInfo = Field(
@@ -307,7 +308,7 @@ class BELTOutput(BaseModel):
     def plot_distribution(
         self, file_id: int, xkey: str, ykey: str, bins: int = 50
     ) -> None:
-        self.particle_distributions[file_id].plot(xkey="t", ykey="energy", bins=100)
+        return self.particle_distributions[file_id].plot(xkey="t", ykey="energy", bins=bins)
 
     def archive(self, h5: h5py.Group) -> None:
         """
