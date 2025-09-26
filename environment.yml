@@ -1,5 +1,5 @@
 # conda env create -f environment.yml
-name: lume-eblt-dev
+name: lume-belt-dev
 channels:
   - conda-forge
 dependencies:
@@ -11,6 +11,7 @@ dependencies:
   - psutil
   - pydantic >2
   - pydantic-settings
+  - BELT
   # Developer
   - ffmpeg
   - pytest
@@ -30,4 +31,6 @@ dependencies:
   - ruff
   - typing-extensions
   - pip:
+      # Install this package as well
+      - .
       - mkdocs-jupyter>=0.24.7
