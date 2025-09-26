@@ -12,7 +12,7 @@ inputs:
   env_name:
     description: "Conda environment name to create"
     required: false
-    default: "lume-genesis-dev"
+    default: "lume-belt-dev"
   extras:
     description: "Package extras to install"
     required: true
