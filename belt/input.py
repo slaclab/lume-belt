@@ -101,6 +101,8 @@ class Bend(BaseModel):
     SC_switch: Optional[float] = Field(
         None, description="Switch for space charge (1 on, otherwise off)"
     )
+    SS_height: Optional[float] = Field(None, description="Vertical aperture height (m) for CSR shielding")
+    SS_image_num: Optional[int] = Field(None, description="Number images charge layers for CSR shielding")
     name: Optional[str] = Field(None, description="Optional name for the bend element")
 
     @classmethod
@@ -109,8 +111,10 @@ class Bend(BaseModel):
             length=lattice_element.length,
             beam_radius=lattice_element.V[0],
             angle=lattice_element.V[4],
-            CSR_switch=lattice_element.V[6] if len(lattice_element.V) > 6 else None,
-            SC_switch=lattice_element.V[7] if len(lattice_element.V) > 7 else None,
+            CSR_switch=lattice_element.V[5] if len(lattice_element.V) > 5 else None,
+            SC_switch=lattice_element.V[6] if len(lattice_element.V) > 6 else None,
+            SS_height=lattice_element.V[7] if len(lattice_element.V) > 7 else None,
+            SS_image_num = lattice_element.V[8] if len(lattice_element.V) > 8 else None,
             name=lattice_element.name,
         )
 
@@ -126,9 +130,17 @@ class Bend(BaseModel):
             V.append(0)  # Placeholder for V6
             V.append(self.CSR_switch)
         if self.SC_switch is not None:
-            if len(V) < 7:
+            if len(V) < 6:
                 V.append(0)  # Ensure correct index for SC_switch
             V.append(self.SC_switch)
+        if self.SS_height is not None:
+            if len(V) < 7:
+                V.append(0)  # Ensure correct index for SC_switch
+            V.append(self.SS_height)
+        if self.SS_image_num is not None:
+            if len(V) < 8:
+                V.append(0)  # Ensure correct index for SC_switch
+            V.append(self.SS_image_num)
 
         return LatticeElement(
             length=self.length, Bnseg=1, Bmpstp=1, Btype=4, V=V, name=self.name
@@ -156,6 +168,12 @@ class Chicane(BaseModel):
     SC_switch: Optional[float] = Field(
         None, description="Switch for space charge (1 on, otherwise off)"
     )
+    SS_height: Optional[float] = Field(
+        None, description="Vertical aperture height (m) for CSR shielding"
+    )
+    SS_image_num: Optional[int] = Field(
+        None, description="Number images charge layers for CSR shielding"
+    )
     name: Optional[str] = Field(
         None, description="Optional name for the chicane element"
     )
@@ -165,15 +183,15 @@ class Chicane(BaseModel):
         return cls(
             length=lattice_element.length,
             beam_radius=lattice_element.V[0],
-            drift_length=lattice_element.V[1]
-            if len(lattice_element.V) > 2
-            else None,  # From Manual it seems that R56t and drift length share V
-            R56=lattice_element.V[1] if len(lattice_element.V) > 2 else None,
+            drift_length=lattice_element.V[1] if len(lattice_element.V) > 1 else None,  # From Manual it seems that R56t and drift length share V
+            R56=lattice_element.V[1] if len(lattice_element.V) > 1 else None,
             T566=lattice_element.V[2] if len(lattice_element.V) > 2 else None,
             U5666=lattice_element.V[3] if len(lattice_element.V) > 3 else None,
             angle=lattice_element.V[4],
             CSR_switch=lattice_element.V[5] if len(lattice_element.V) > 5 else None,
             SC_switch=lattice_element.V[6] if len(lattice_element.V) > 6 else None,
+            SS_height=lattice_element.V[7] if len(lattice_element.V) > 7 else None,
+            SS_image_num=lattice_element.V[8] if len(lattice_element.V) > 8 else None,
             name=lattice_element.name,
         )
 
@@ -192,6 +210,10 @@ class Chicane(BaseModel):
             V.append(self.CSR_switch)
         if self.SC_switch is not None:
             V.append(self.SC_switch)
+        if self.SS_height is not None:
+            V.append(self.SS_height)
+        if self.SS_image_num is not None:
+            V.append(self.SS_image_num)
 
         return LatticeElement(
             length=self.length,
