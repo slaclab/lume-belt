@@ -33,4 +33,4 @@ repos:
         stages: [pre-commit]
         language: system
         entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace
-        #exclude: "^docs/examples/.*\\.ipynb$"
+        exclude: "^docs/examples/.*\\.ipynb$"
