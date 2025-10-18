@@ -32,5 +32,5 @@ dependencies:
   - typing-extensions
   - pip:
       # Install this package as well
-      - .
+      #- .
       - mkdocs-jupyter>=0.24.7
