@@ -101,8 +101,12 @@ class Bend(BaseModel):
     SC_switch: Optional[float] = Field(
         None, description="Switch for space charge (1 on, otherwise off)"
     )
-    SS_height: Optional[float] = Field(None, description="Vertical aperture height (m) for CSR shielding")
-    SS_image_num: Optional[int] = Field(None, description="Number images charge layers for CSR shielding")
+    SS_height: Optional[float] = Field(
+        None, description="Vertical aperture height (m) for CSR shielding"
+    )
+    SS_image_num: Optional[int] = Field(
+        None, description="Number images charge layers for CSR shielding"
+    )
     name: Optional[str] = Field(None, description="Optional name for the bend element")
 
     @classmethod
@@ -114,7 +118,7 @@ class Bend(BaseModel):
             CSR_switch=lattice_element.V[5] if len(lattice_element.V) > 5 else None,
             SC_switch=lattice_element.V[6] if len(lattice_element.V) > 6 else None,
             SS_height=lattice_element.V[7] if len(lattice_element.V) > 7 else None,
-            SS_image_num = lattice_element.V[8] if len(lattice_element.V) > 8 else None,
+            SS_image_num=lattice_element.V[8] if len(lattice_element.V) > 8 else None,
             name=lattice_element.name,
         )
 
@@ -183,7 +187,9 @@ class Chicane(BaseModel):
         return cls(
             length=lattice_element.length,
             beam_radius=lattice_element.V[0],
-            drift_length=lattice_element.V[1] if len(lattice_element.V) > 1 else None,  # From Manual it seems that R56t and drift length share V
+            drift_length=lattice_element.V[1]
+            if len(lattice_element.V) > 1
+            else None,  # From Manual it seems that R56t and drift length share V
             R56=lattice_element.V[1] if len(lattice_element.V) > 1 else None,
             T566=lattice_element.V[2] if len(lattice_element.V) > 2 else None,
             U5666=lattice_element.V[3] if len(lattice_element.V) > 3 else None,
@@ -431,7 +437,6 @@ class BELTInput(BaseModel):
         Wakefield,
         Exit,
     ]:
-       
         lattice_element = LatticeElement(
             length=lattice_values[0],
             Bnseg=lattice_values[1] if len(lattice_values) > 1 else None,
@@ -725,8 +730,8 @@ def test_belt_interface():
     output_lines = belt_input.to_lines()
     parsed_output = BELTInput.parse_from_lines(output_lines)
 
-    assert (
-        parsed_output == belt_input
-    ), "Test failed: Parsed output does not match the original input object."
+    assert parsed_output == belt_input, (
+        "Test failed: Parsed output does not match the original input object."
+    )
 
     print("Test passed!")

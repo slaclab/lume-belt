@@ -436,7 +436,7 @@ class BELT(CommandWrapper):
 
     def write_initial_particles(self, path: Optional[AnyPath] = None) -> None:
         if self.initial_particles:
-            #Ek = self._input.parameters.Ek
+            # Ek = self._input.parameters.Ek
             if isinstance(self.initial_particles, ParticleGroup):
                 self.initial_particles = BELTParticleData.from_ParticleGroup(
                     self.initial_particles
@@ -451,7 +451,9 @@ class BELT(CommandWrapper):
             self._input.parameters.flagdist = 100
             self._input.parameters.np = self.initial_particles.np
             self._input.parameters.charge = np.sum(self.initial_particles.weight)
-            self._input.parameters.Iavg = self._input.parameters.charge*self._input.parameters.freq
+            self._input.parameters.Iavg = (
+                self._input.parameters.charge * self._input.parameters.freq
+            )
 
         elif self._input.parameters.flagdist in [100, 200, 300]:
             src = os.path.join(self.input_file_path, "pts.in")
@@ -473,7 +475,7 @@ class BELT(CommandWrapper):
         print("Updating Ek in the header to", Ek, "eV")
 
         self._input.parameters.Ek = Ek
-        #self.initial_particles.shift_ref_energy(Ek)
+        # self.initial_particles.shift_ref_energy(Ek)
 
     def update_beam_radius(self, r: float, name: str) -> None:
         print("Updating beam radius in the lattice element ", name, " to be ", r)

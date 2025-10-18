@@ -1,4 +1,3 @@
-from distgen import Generator
 import os
 
 
@@ -8,7 +7,6 @@ from .evaluate import default_belt_merit
 from . import tools
 from typing import Optional, Dict, Union, Callable
 from .types import AnyPath
-import distgen
 from .particles import BELTParticleData
 
 
@@ -39,22 +37,18 @@ def run_belt(
 
     if settings:
         for key in settings:
-            
             val = settings[key]
 
             # reading ImpactT particles
-            if key == "Impact_particles": 
-                
+            if key == "Impact_particles":
                 if verbose:
                     print(f"Reading {key} = {val}")
 
-                
-                E.initial_particles = BELTParticleData.from_ParticleGroup_h5(h5 = val)
-            #upsampling particles
+                E.initial_particles = BELTParticleData.from_ParticleGroup_h5(h5=val)
+            # upsampling particles
             elif key == "num_doublings":
-                
-                E.initial_particles.upsampling(num_doublings = val)
-                
+                E.initial_particles.upsampling(num_doublings=val)
+
             else:
                 # Assume BELT
                 if verbose:
@@ -73,9 +67,8 @@ def run_belt(
                         if element.name == key[0]:
                             setattr(element, key[1], val)
 
-
     # Attach particles
-    #E.initial_particles = P
+    # E.initial_particles = P
 
     E.run()
 
@@ -141,7 +134,7 @@ def fingerprint_belt(belt_object: BELT):
     Calls fingerprint() of each of these objects
     """
     f1 = belt_object.fingerprint()
-    #f2 = distgen_object.fingerprint()
+    # f2 = distgen_object.fingerprint()
     d = {"f1": f1}
     return tools.fingerprint(d)
 
@@ -150,7 +143,6 @@ def archive_belt(
     belt_object,
     archive_file=None,
     belt_group="belt",
-    
 ):
     """
     Creates a new archive_file (hdf5) with groups for

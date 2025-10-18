@@ -271,5 +271,3 @@ def fingerprint(keyed_data, digest_size=16):
         s = json.dumps(val, sort_keys=True, cls=NpEncoder).encode()
         h.update(s)
     return h.hexdigest()
-
-
