@@ -7,6 +7,7 @@ dependencies:
   - eval-type-backport
   - lume-base
   - numpy
+  - distgen
   - prettytable
   - psutil
   - pydantic >2
