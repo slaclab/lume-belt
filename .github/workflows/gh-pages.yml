@@ -67,7 +67,11 @@ jobs:
       - name: Execute notebooks
         shell: bash -l {0}
         run: |
-          scripts/execute_notebooks.bash
+          EXCLUDE_LIST="$(echo "${SKIP_NOTEBOOKS}" | tr '\n' ',' | sed 's/,$//')"
+          EXCLUDE_GLOB="$(echo "${SKIP_NOTEBOOKS_GLOB}" | tr '\n' ',' | sed 's/,$//')"
+          EXCLUDE_ALL="${EXCLUDE_LIST}${EXCLUDE_GLOB:+,${EXCLUDE_GLOB}}"
+          scripts/execute_notebooks.bash --exclude "${EXCLUDE_ALL}"
+
 
       - name: Build Docs
         shell: bash -l {0}
